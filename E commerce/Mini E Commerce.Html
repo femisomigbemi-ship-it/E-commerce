@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🔋 C worth battery store | mini e‑commerce</title>
+  <!-- Font Awesome for icons (battery, cart) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    }
+
+    body {
+      background: #f4f7fc;
+      color: #122b44;
+      padding: 1.5rem;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: row;
+      gap: 2rem;
+    }
+
+    /* main product area */
+    .shop {
+      flex: 2.5;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 1.5rem;
+    }
+
+    h1 i {
+      color: #2a6e2a;
+    }
+
+    /* filter buttons */
+    .filter-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.7rem;
+      margin-bottom: 2rem;
+    }
+
+    .filter-btn {
+      background: white;
+      border: 1px solid #cbd5e1;
+      padding: 0.6rem 1.4rem;
+      border-radius: 40px;
+      font-weight: 600;
+      font-size: 0.95rem;
+      cursor: pointer;
+      transition: all 0.15s;
+      color: #1e3a5f;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.02);
+    }
+
+    .filter-btn.active {
+      background: #1e3a5f;
+      color: white;
+      border-color: #1e3a5f;
+    }
+
+    .filter-btn:hover {
+      background: #e5edf5;
+    }
+
+    /* product grid */
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+      gap: 1.5rem;
+    }
+
+    .product-card {
+      background: white;
+      border-radius: 24px;
+      padding: 1.2rem 1rem 1.5rem;
+      box-shadow: 0 10px 20px -8px rgba(0,30,60,0.1);
+      transition: transform 0.1s ease;
+      display: flex;
+      flex-direction: column;
+      border: 1px solid #e2edf5;
+    }
+
+    .product-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -10px #1e3a5f40;
+    }
+
+    /* image placeholder – now displays actual product images */
+    .image-placeholder {
+      width: 100%;
+      aspect-ratio: 1 / 1;
+      background: #d9e6f2;
+      border-radius: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;      /* ensures image fits within rounded corners */
+      margin-bottom: 1rem;
+    }
+
+    .image-placeholder img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;     /* makes image cover the area without distortion */
+      display: block;
+    }
+
+    .product-name {
+      font-weight: 700;
+      font-size: 1.3rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .product-category {
+      font-size: 0.9rem;
+      color: #2b6f9b;
+      background: #e7f0f9;
+      display: inline-block;
+      padding: 0.25rem 1rem;
+      border-radius: 30px;
+      margin: 0.5rem 0 0.8rem;
+      align-self: flex-start;
+    }
+
+    .price-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: auto;
+    }
+
+    .price {
+      font-size: 1.6rem;
+      font-weight: 700;
+      color: #1e3a5f;
+    }
+
+    .add-btn {
+      background: #1e3a5f;
+      border: none;
+      color: white;
+      width: 46px;
+      height: 46px;
+      border-radius: 50%;
+      font-size: 1.4rem;
+      cursor: pointer;
+      transition: background 0.1s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .add-btn:hover {
+      background: #143048;
+    }
+
+    /* ----- CART SECTION (sidebar style) ----- */
+    .cart-panel {
+      flex: 1;
+      min-width: 280px;
+      background: white;
+      border-radius: 32px;
+      padding: 1.8rem 1.5rem;
+      box-shadow: 0 15px 30px -10px #122b4430;
+      align-self: start;
+      position: sticky;
+      top: 1rem;
+      border: 1px solid #dbeafe;
+    }
+
+    .cart-panel h2 {
+      display: flex;
+      gap: 0.6rem;
+      align-items: center;
+      font-size: 1.8rem;
+      margin-bottom: 1.8rem;
+      border-bottom: 2px dashed #cbd5e1;
+      padding-bottom: 0.8rem;
+    }
+
+    .cart-items {
+      list-style: none;
+      margin-bottom: 1.8rem;
+      max-height: 380px;
+      overflow-y: auto;
+      padding-right: 5px;
+    }
+
+    .cart-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.8rem 0;
+      border-bottom: 1px solid #eef2f6;
+      font-size: 0.95rem;
+    }
+
+    .cart-item-info {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .cart-item-name {
+      font-weight: 600;
+    }
+
+    .cart-item-price {
+      color: #1e3a5f;
+      font-weight: 500;
+    }
+
+    .cart-item-remove {
+      background: none;
+      border: none;
+      color: #a0b8cc;
+      cursor: pointer;
+      font-size: 1.1rem;
+      padding: 6px;
+      border-radius: 50%;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .cart-item-remove:hover {
+      background: #f1f5f9;
+      color: #c0394b;
+    }
+
+    .cart-total {
+      font-size: 1.5rem;
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      border-top: 2px solid #d0e0f0;
+      padding-top: 1.2rem;
+      margin-bottom: 1.2rem;
+    }
+
+    .clear-cart {
+      background: #eef2f6;
+      border: 1px solid #bdd3e8;
+      color: #1e3a5f;
+      padding: 0.8rem;
+      border-radius: 50px;
+      font-weight: 600;
+      width: 100%;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: 0.15s;
+    }
+
+    .clear-cart:hover {
+      background: #dce7f2;
+    }
+
+    /* responsive */
+    @media (max-width: 900px) {
+      .container {
+        flex-direction: column;
+      }
+      .cart-panel {
+        position: static;
+        width: 100%;
+      }
+    }
+
+    @media (max-width: 500px) {
+      .product-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- left side: shop -->
+    <section class="shop">
+      <h1>
+        <i class="fas fa-battery-full"></i>
+        C worth Lithium Battery warehouse
+      </h1>
+
+      <!-- category filters (will be populated by js) -->
+      <div class="filter-bar" id="filterContainer">
+        <!-- dynamic from js -->
+      </div>
+
+      <!-- product grid -->
+      <div class="product-grid" id="productGrid"></div>
+    </section>
+
+    <!-- right side: cart -->
+    <aside class="cart-panel">
+      <h2><i class="fas fa-shopping-cart"></i> Cart</h2>
+      <ul class="cart-items" id="cartList">
+        <!-- filled by js -->
+      </ul>
+      <div class="cart-total">
+        <span>Total</span>
+        <span id="cartTotal">$0</span>
+      </div>
+      <button class="clear-cart" id="clearCartBtn"><i class="far fa-trash-alt"></i> Clear cart</button>
+    </aside>
+  </div>
+
+  <script>
+    (function() {
+      // ==========  PRODUCT DATA  ==========
+      // 
+      const products = [
+        { id: 1, name: '1.3kWh 12V Lithium', category: '12V', price: 249, image: '1.3kwh.jpg' },
+        { id: 2, name: '2.5kWh 12V Lithium', category: '12V', price: 399, image: '2.5kwh.jpg' },
+        { id: 3, name: '3.8kWh 12V Lithium', category: '12V', price: 549, image: '3.8kwh.jpg' },
+        { id: 4, name: '5kWh 24V Lithium', category: '24V', price: 799, image: '5kwh.jpg' },
+        { id: 5, name: '10kWh 51.2V Lithium', category: '51.2V', price: 1399, image: '10kwh.jpg' },
+        { id: 6, name: '15kWh 51.2V Lithium', category: '51.2V', price: 1999, image: '15kwh.jpg' },
+        { id: 7, name: '20kWh 51.2V Lithium', category: '51.2V', price: 2599, image: '20kwh.jpg' }
+      ];
+
+      // ==========  CART STATE  ==========
+      let cart = []; // each item: { id, name, price }
+
+      // ==========  FILTER STATE  ==========
+      let activeCategory = 'All'; // 'All', '12V', '24V', '51.2V'
+
+      // ==========  DOM ELEMENTS  ==========
+      const productGrid = document.getElementById('productGrid');
+      const filterContainer = document.getElementById('filterContainer');
+      const cartListEl = document.getElementById('cartList');
+      const cartTotalEl = document.getElementById('cartTotal');
+      const clearCartBtn = document.getElementById('clearCartBtn');
+
+      // ==========  HELPER FUNCTIONS  ==========
+      function formatPrice(price) {
+        return '$' + price.toFixed(2);
+      }
+
+      // ==========  RENDER PRODUCTS based on active filter ==========
+      function renderProducts() {
+        const filtered = activeCategory === 'All' 
+          ? products 
+          : products.filter(p => p.category === activeCategory);
+
+        productGrid.innerHTML = filtered.map(prod => {
+          return `
+            <div class="product-card" data-id="${prod.id}">
+              <div class="image-placeholder">
+                <img src="images/${prod.image}" alt="${prod.name}">
+              </div>
+              <div class="product-name">${prod.name}</div>
+              <span class="product-category">${prod.category}</span>
+              <div class="price-row">
+                <span class="price">${formatPrice(prod.price)}</span>
+                <button class="add-btn" data-id="${prod.id}" data-name="${prod.name}" data-price="${prod.price}">
+                  <i class="fas fa-plus"></i>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      // ==========  RENDER FILTER BUTTONS ==========
+      function renderFilters() {
+        const categories = ['All', '12V', '24V', '51.2V'];
+        filterContainer.innerHTML = categories.map(cat => {
+          const activeClass = cat === activeCategory ? 'active' : '';
+          return `<button class="filter-btn ${activeClass}" data-cat="${cat}">${cat}</button>`;
+        }).join('');
+
+        // attach filter event listeners
+        document.querySelectorAll('.filter-btn').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const cat = e.currentTarget.dataset.cat;
+            activeCategory = cat;
+            renderFilters();    // re-render to reflect active class
+            renderProducts();   // update product grid
+          });
+        });
+      }
+
+      // ==========  RENDER CART (list + total) ==========
+      function renderCart() {
+        if (cart.length === 0) {
+          cartListEl.innerHTML = '<div style="color:#94a3b8; text-align:center; padding:1rem;">cart is empty</div>';
+          cartTotalEl.innerText = '$0.00';
+          return;
+        }
+
+        let total = 0;
+        const itemsHtml = cart.map((item, index) => {
+          total += item.price;
+          return `
+            <li class="cart-item" data-cart-index="${index}">
+              <div class="cart-item-info">
+                <span class="cart-item-name">${item.name}</span>
+                <span class="cart-item-price">${formatPrice(item.price)}</span>
+              </div>
+              <button class="cart-item-remove" data-id="${item.id}" data-cart-index="${index}">
+                <i class="fas fa-times"></i>
+              </button>
+            </li>
+          `;
+        }).join('');
+
+        cartListEl.innerHTML = itemsHtml;
+        cartTotalEl.innerText = formatPrice(total);
+
+        // Attach remove event to each delete button (by id or cart-index)
+        document.querySelectorAll('.cart-item-remove').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            const index = e.currentTarget.dataset.cartIndex;
+            if (index !== undefined) {
+              cart.splice(index, 1);
+            } else {
+              const prodId = Number(e.currentTarget.dataset.id);
+              const foundIndex = cart.findIndex(item => item.id === prodId);
+              if (foundIndex !== -1) cart.splice(foundIndex, 1);
+            }
+            renderCart();
+          });
+        });
+      }
+
+      // ==========  ADD TO CART ==========
+      function addToCart(productId, productName, productPrice) {
+        cart.push({
+          id: productId,
+          name: productName,
+          price: productPrice
+        });
+        renderCart();
+      }
+
+      // ==========  CLEAR CART ==========
+      clearCartBtn.addEventListener('click', () => {
+        cart = [];
+        renderCart();
+      });
+
+      // ==========  EVENT DELEGATION FOR ADD BUTTONS ==========
+      productGrid.addEventListener('click', (e) => {
+        const addBtn = e.target.closest('.add-btn');
+        if (addBtn) {
+          const id = Number(addBtn.dataset.id);
+          const name = addBtn.dataset.name;
+          const price = Number(addBtn.dataset.price);
+          addToCart(id, name, price);
+        }
+      });
+
+      // ==========  INITIALISE ==========
+      renderFilters();
+      renderProducts();
+      renderCart();
+    })();
+  </script>
+</body>
+</html>
